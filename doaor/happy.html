@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBD Dokor - Memory Book</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ee9ca7; /* สีชมพูพื้นหลัง */
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- ของที่ลอยพื้นหลัง (ลูกโป่งและรูปภาพ) --- */
+        .balloon {
+            position: absolute;
+            bottom: -150px;
+            width: 50px;
+            height: 70px;
+            border-radius: 50%;
+            opacity: 0.7;
+            z-index: 1;
+            animation: floatUp 7s linear infinite;
+        }
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -25px;
+            left: 25px;
+            width: 1px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .photo-float {
+            position: absolute;
+            bottom: -150px;
+            border: 3px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            object-fit: cover;
+            opacity: 0.8;
+            z-index: 1;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(-130vh) rotate(var(--r)) scale(var(--s)); opacity: 0; }
+        }
+
+        /* --- โครงสร้างสมุด --- */
+        .book {
+            position: relative;
+            width: 350px;
+            height: 450px;
+            transition: transform 0.5s;
+            cursor: pointer;
+            z-index: 50;
+        }
+
+        .paper {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            perspective: 1500px;
+        }
+
+        .front, .back {
+            background-color: white;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backface-visibility: hidden;
+            transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+            box-shadow: 1px 1px 15px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .back { transform: rotateY(180deg); z-index: 0; }
+        .flipped .front { transform: rotateY(-180deg); }
+        .flipped .back { transform: rotateY(0deg); z-index: 1; }
+
+        .front img, .back img {
+            width: 90%;
+            height: 60%;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 5px solid #f9f9f9;
+        }
+
+        .text-content { text-align: center; color: #8b6a60; }
+        #p1 .front { background: #f1bac4; color: white; }
+        
+        .back-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: white;
+            color: #ee9ca7;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: bold;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">← กลับ</a>
+
+    <div id="book" class="book">
+        <div id="p1" class="paper">
+            <div class="front">
+                <div class="text-content">
+                    <h1 style="font-family:'Dancing Script'; font-size:2.5rem;">Happy Birthday<br>to Dokor</h1>
+                    <p style="margin-top:15px;">ກົດເພື່ອເປີດອ່ານ 📖</p>
+                </div>
+            </div>
+            <div class="back">
+                <img src="01.png" alt="Memory 1">
+                <div class="text-content">
+                    <h2>Our Special Memory</h2>
+                    <p>วันนี้เป็นวันที่ดีที่สุดเลย Dokor</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="p2" class="paper">
+            <div class="front">
+                <img src="01.png" alt="Memory 2">
+                <div class="text-content">
+                    <h2> Happy Birthday Dokor Euay phorn br keng </h2>
+                    <p>tae khr hai Bai nar khong Jao mi Hoy yim laiy kua Hoy nam ta der ya hai Phai ma ao Hoy yim Aun sod Sai ni khong Jao Pai lei der</p>
+                </div>
+            </div>
+            <div class="back">
+                <div class="text-content">
+                    <h1 style="font-family:'Dancing Script'">The End</h1>
+                    <p>love2 </p>
+                    <p style="font-size: 2rem; margin-top: 10px;"><3 </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. ตั้งค่ารูปภาพที่จะให้ลอยสุ่ม 4 รูป ---
+      // --- 1. ตั้งค่ารูปภาพที่จะให้ลอยสุ่ม 4 รูป (จากโฟลเดอร์ในเครื่อง) ---
+const floatingPhotos = [
+    'd1.jpeg',  // รูปที่ 1
+    'd2.jpeg',   // รูปที่ 2
+    'd3.jpeg',   // รูปที่ 3
+    'd4.jpeg'   // รูปที่ 4
+];
+
+        // --- 2. ฟังก์ชันสร้างของลอย (ลูกโป่ง + รูป) ---
+        function createFloatingItem() {
+            const isPhoto = Math.random() < 0.25; // โอกาสเกิดรูปภาพ 25%
+            const el = document.createElement(isPhoto ? 'img' : 'div');
+            
+            el.style.left = (Math.random() * 100) + 'vw';
+            el.style.setProperty('--r', (Math.random() * 60 - 30) + 'deg');
+            el.style.setProperty('--s', (0.7 + Math.random() * 0.5));
+            const duration = (6 + Math.random() * 5) + 's';
+            el.style.animationDuration = duration;
+
+            if (isPhoto) {
+                el.className = 'photo-float';
+                el.src = floatingPhotos[Math.floor(Math.random() * floatingPhotos.length)];
+                const size = (70 + Math.random() * 50) + 'px';
+                el.style.width = size;
+                el.style.height = size;
+            } else {
+                el.className = 'balloon';
+                const colors = ['#ff6b81', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#ffffff'];
+                el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), parseFloat(duration) * 1000);
+        }
+        setInterval(createFloatingItem, 600);
+
+        // --- 3. ระบบสมุด ---
+        const papers = document.querySelectorAll(".paper");
+        papers.forEach((paper, index) => {
+            paper.style.zIndex = papers.length - index;
+            paper.addEventListener("click", () => {
+                if (paper.classList.contains("flipped")) {
+                    paper.classList.remove("flipped");
+                    setTimeout(() => { paper.style.zIndex = papers.length - index; }, 500);
+                } else {
+                    paper.classList.add("flipped");
+                    paper.style.zIndex = index + 1;
+                    // ยิงพลุ
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#ffffff', '#ffc1cc', '#ee9ca7']
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
